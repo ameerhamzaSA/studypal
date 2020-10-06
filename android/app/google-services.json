@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "153335942242",
+    "firebase_url": "https://clinical-study-cs.firebaseio.com",
+    "project_id": "clinical-study-cs",
+    "storage_bucket": "clinical-study-cs.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153335942242:android:25a8315685dbc2811cd53b",
+        "android_client_info": {
+          "package_name": "com.studypal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBy3MkPUnjUBYnkytmJ9omh-hWsScLpM4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153335942242:android:25885ea36170332c1cd53b",
+        "android_client_info": {
+          "package_name": "com.test1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBy3MkPUnjUBYnkytmJ9omh-hWsScLpM4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:153335942242:android:d833f363b667c1c01cd53b",
+        "android_client_info": {
+          "package_name": "com.testapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBy3MkPUnjUBYnkytmJ9omh-hWsScLpM4s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "153335942242-0rlqkqe5f6v5omkfcvab4q9coc6vhbbp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

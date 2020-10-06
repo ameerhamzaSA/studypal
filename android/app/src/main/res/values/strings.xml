@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">studypal</string>
+    <color name="white">#FFF</color>
+    <!-- <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string> -->
+    <!-- <string name="default_notification_channel_id" translatable="false">fcm_fallback_notification_channel</string> -->
+
+</resources>

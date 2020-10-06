@@ -1,0 +1,32 @@
+{
+  "questions": [
+    {
+      "question": "Question no one",
+      "type": 1
+    },
+    {
+      "question": "Question no Two",
+      "type": 2,
+      "options": [
+        "radio option 1",
+        "radio option 2"
+      ]
+    },
+    {
+      "question": "Question no Three",
+      "type": 3,
+      "options": [
+        "checkbox option 1",
+        "checkbox option 2"
+      ]
+    },
+    {
+      "question": "Question no Five",
+      "type": 3,
+      "options": [
+        "checkbox option 1e",
+        "checkbox option 2e"
+      ]
+    }
+  ]
+}

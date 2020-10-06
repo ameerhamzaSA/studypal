@@ -1,0 +1,22 @@
+{
+  "questions": [
+    {
+      "question": "what is your name",
+      "type": 1
+    },
+    {
+      "question": "what is your name",
+      "type": 2,
+      "options": [
+        "radio option 1",
+        "radio option 2",
+        "radio option 3",
+        "radio option 4"
+      ]
+    }
+  ],
+  "languages": [
+    "Urdu",
+    "English"
+  ]
+}
