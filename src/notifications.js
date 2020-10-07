@@ -13,7 +13,7 @@ export const onOpenNotification = (notification) => {
 };
 
 export const onRegister = async (token) => {
-  //console.log(token); // Save Token Here
+  console.log(token); // Save Token Here
   await AsyncStorage.setItem('token',JSON.stringify(token.token))
 };
 

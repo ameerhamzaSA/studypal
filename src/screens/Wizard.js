@@ -169,13 +169,78 @@ const Wizard = (props) => {
           yasir = temObject;
         }
         if (item.answer_type == 3) {
-          let spec = {};
-          item.specifications.map((item, index) => {
-            let ob = {
-              ...spec,
-              [item.name]: {value: ''},
-            };
-            spec = ob;
+          let subObj = {};
+          item.specifications.map((subItems, index) => {
+            subObj[subItems.name] = [];
+            //console.log(subItems.name);
+            let spec_questions = JSON.parse(subItems.specification_questions);
+            //console.log('+++++++++++++++');
+            //console.log(JSON.parse(subItems.specification_questions));
+            Object.keys(spec_questions.specification_question).map((sub) => {
+              //console.log(spec_questions.specification_question[sub]);
+              if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '1'
+              ) {
+                subObj[subItems.name].push({
+                  value: '',
+                  type: 'text',
+                  name: spec_questions.specification_question[sub].name,
+                });
+              } else if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '2'
+              ) {
+                subObj[subItems.name].push({
+                  value: '',
+                  type: 'radio', //radio
+                  name: spec_questions.specification_question[sub].name,
+                  answers:
+                    spec_questions.specification_question[sub]
+                      .specification_answers,
+                });
+              } else if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '3'
+              ) {
+                subObj[subItems.name].push({
+                  value: [],
+                  type: 'checkbox',
+                  name: spec_questions.specification_question[sub].name,
+                  answers:
+                    spec_questions.specification_question[sub]
+                      .specification_answers,
+                });
+              } else if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '4'
+              ) {
+                subObj[subItems.name].push({
+                  value: '',
+                  type: 'date',
+                  name: spec_questions.specification_question[sub].name,
+                });
+              } else if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '5'
+              ) {
+                subObj[subItems.name].push({
+                  value: '',
+                  type: 'time',
+                  name: spec_questions.specification_question[sub].name,
+                });
+              } else if (
+                spec_questions.specification_question[sub]
+                  .specification_answer_type == '6'
+              ) {
+                subObj[subItems.name].push({
+                  value: '',
+                  type: 'datetime',
+                  name: spec_questions.specification_question[sub].name,
+                });
+              }
+            });
+            //console.log(subObj);
           });
           let temObject = {
             ...yasir,
@@ -184,7 +249,7 @@ const Wizard = (props) => {
               values: [],
               frequency: result.data.schedule.frequency,
               item,
-              spec,
+              subObj,
             },
           };
           yasir = temObject;
@@ -302,12 +367,13 @@ const Wizard = (props) => {
     setItemType('');
   };
   const onChangeSpec = (item, key, newValue, checkbox) => {
+    // console.log('*********', nestedAnswers);
     let dd = {...nestedAnswers};
     // console.log('dd ---',dd['10']['Option 1'])
     for (const [_key, value] of Object.entries(
       fields[item.item.answer.question_id].subObj,
     )) {
-      console.log('before', fields[item.item.answer.question_id].subObj[_key]);
+      // console.log('before', fields[item.item.answer.question_id].type);
       for (
         let index = 0;
         index < fields[item.item.answer.question_id].subObj[_key].length;
@@ -318,6 +384,7 @@ const Wizard = (props) => {
           key.name
         ) {
           let parentOption = fields[item.item.answer.question_id].subObj;
+          // console.log('parent***', parentOption);
           let subOptions = parentOption[_key];
           let subOptionSingle = subOptions[index];
           if (checkbox) {
@@ -334,11 +401,15 @@ const Wizard = (props) => {
           } else {
             subOptionSingle.value = newValue;
           }
-          console.log('checbox', subOptionSingle.value);
+          // console.log('checbox', subOptionSingle.value);
           subOptions[index] = subOptionSingle;
+          if (fields[item.item.answer.question_id].type == 'radio') {
+            parentOption.type = 'radio';
+            parentOption.selected = _key;
+          }
           parentOption[_key] = subOptions;
           dd[item.item.answer.question_id] = parentOption;
-
+          // console.log('dd**', dd);
           // dd = {
           //   [item.item.answer.question_id]: {
           //     [_key]: {
@@ -522,8 +593,60 @@ const Wizard = (props) => {
     //   fields: JSON.stringify(fields),
     //   nestedAnswer: JSON.stringify(nestedAnswers)
     // }
+
+    let obj = fields;
+    let response = {};
+    let answers = {};
+    response.questions = Object.keys(obj);
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        // console.log(obj[key].subObj);
+        if (obj[key].subObj && nestedAnswers[key]) {
+          if (nestedAnswers[key] && nestedAnswers[key].type == 'radio') {
+            let spec = {};
+            nestedAnswers[key][obj[key].subObj.selected].map((e) => {
+              spec[e.name] = e.value;
+            });
+            answers[key] = {
+              selected_answer: obj[key].subObj.selected,
+              specifications: spec,
+            };
+          } else {
+            let objAnswer = {};
+            // console.log('****',obj[key])
+            obj[key].values.map((n) => {
+              let spec = {};
+              Object.keys(nestedAnswers[key]).map((e) => {
+                nestedAnswers[key][n].map((e) => {
+                  spec[e.name] = e.value;
+                });
+              });
+              objAnswer[n] = spec;
+            });
+            answers[key] = {
+              selected_answer: obj[key].values,
+              specifications: {
+                specifications: objAnswer,
+              },
+            };
+            console.log(answers)
+          }
+        } else {
+          // console.log(JSON.stringify(obj[key]))
+          answers[key] = {
+            selected_answer: obj[key].value,
+          };
+        }
+      }
+    }
+    response.answer = answers;
+    response._token=parsed.api_token
+    console.log(JSON.stringify(response));
+    // setNestedAnswers({})
+    // console.log(fields);
+    // console.log(JSON.stringify(nestedAnswers));
     let result = await post('user/' + parsed.id + '/questions/answers', {
-      data: JSON.stringify(fields),
+      data: JSON.stringify(response),
     });
     if (result.status) {
       props.navigation.pop();
@@ -680,7 +803,7 @@ const Wizard = (props) => {
                         paddingHorizontal: 15,
                       }}>
                       {item[1].item.answers.map((option, index2) => {
-                        //console.log(item[1]);
+                        // console.log(item[1]);
                         let spec_keys_arr = Object.keys(item[1].subObj);
                         //console.log('--------------------------------');
                         //console.log(
@@ -768,13 +891,13 @@ const Wizard = (props) => {
                                                     item[1].subObj[option][i],
                                                     value,
                                                   );
-                                                  console.log(
-                                                    'nestedAnswer',
-                                                    nestedAnswers[
-                                                      item[1].item.answer
-                                                        .question_id
-                                                    ][option][i].value,
-                                                  );
+                                                  // console.log(
+                                                  //   'nestedAnswer',
+                                                  //   nestedAnswers[
+                                                  //     item[1].item.answer
+                                                  //       .question_id
+                                                  //   ][option][i].value,
+                                                  // );
                                                 }}
                                               />
                                             </>
@@ -1061,7 +1184,7 @@ const Wizard = (props) => {
                       }}>
                       {item[1].item.answers.map((option, index2) => {
                         let spec_keys_arr = Object.keys(item[1].subObj);
-
+                        // console.log(item[1].subObj);
                         return (
                           <>
                             <TouchableOpacity
@@ -1097,283 +1220,302 @@ const Wizard = (props) => {
                               </Text>
                             </TouchableOpacity>
                             {spec_keys_arr.includes(option) && (
-                              <View
-                                style={{
-                                  marginLeft: 30,
-                                  padding: item[1].value == option ? 50 : 0,
-                                  backgroundColor: '#D9D6D6',
-                                  borderRadius: 20,
-                                }}>
-                                {item[1].value == option
-                                  ? item[1].subObj[option].map(
-                                      (subQuestion, i) => {
-                                        if (subQuestion.type == 'text') {
-                                          return (
-                                            <>
-                                              <Text
-                                                style={{
-                                                  fontSize: _font(12),
-                                                  color: colours.black,
-                                                  textAlign: 'left',
-                                                }}>
-                                                {subQuestion.name}
-                                              </Text>
+                              <>
+                                <View
+                                  style={{
+                                    marginLeft: 30,
+                                    marginBottom: item[1].values.includes(
+                                      option,
+                                    )
+                                      ? 20
+                                      : 0,
+                                    padding: item[1].values.includes(option)
+                                      ? 50
+                                      : 0,
+                                    backgroundColor: '#D9D6D6',
+                                    borderRadius: 20,
+                                  }}>
+                                  {item[1].values.includes(option)
+                                    ? item[1].subObj[option].map(
+                                        (subQuestion, i) => {
+                                          if (subQuestion.type == 'text') {
+                                            return (
+                                              <>
+                                                <Text
+                                                  style={{
+                                                    fontSize: _font(12),
+                                                    color: colours.black,
+                                                    textAlign: 'left',
+                                                  }}>
+                                                  {subQuestion.name}
+                                                </Text>
 
-                                              <TextInput
-                                                style={{
-                                                  textAlignVertical: 'top',
-                                                  paddingLeft: 10,
-                                                  borderBottomWidth: 1,
-                                                }}
-                                                multiline={true}
-                                                numberOfLines={2}
-                                                value={
-                                                  nestedAnswers[
-                                                    item[1].item.answer
-                                                      .question_id
-                                                  ] != undefined &&
-                                                  nestedAnswers[
-                                                    item[1].item.answer
-                                                      .question_id
-                                                  ][option][i].value
-                                                }
-                                                onChangeText={(value) => {
-                                                  onChangeSpec(
-                                                    item[1],
-                                                    item[1].subObj[option][i],
-                                                    value,
-                                                  );
-                                                  console.log(
-                                                    'nestedAnswer',
+                                                <TextInput
+                                                  style={{
+                                                    textAlignVertical: 'top',
+                                                    paddingLeft: 10,
+                                                    borderBottomWidth: 1,
+                                                  }}
+                                                  multiline={true}
+                                                  numberOfLines={2}
+                                                  value={
                                                     nestedAnswers[
                                                       item[1].item.answer
                                                         .question_id
-                                                    ][option][i].value,
-                                                  );
-                                                }}
-                                              />
-                                            </>
-                                          );
-                                        }
-                                        if (subQuestion.type == 'radio') {
-                                          return (
-                                            <>
-                                              <Text>{subQuestion.name}</Text>
-                                              {subQuestion.answers.map(
-                                                (subQOptions, index3) => {
-                                                  return (
-                                                    <>
-                                                      <TouchableOpacity
-                                                        key={index3}
-                                                        onPress={() => {
-                                                          onChangeSpec(
-                                                            item[1],
-                                                            item[1].subObj[
-                                                              option
-                                                            ][i],
-                                                            subQOptions,
-                                                          );
-                                                        }}
-                                                        style={{
-                                                          width: '100%',
-                                                          marginTop: 20,
-                                                          flexDirection: 'row',
-                                                        }}>
-                                                        <Image
-                                                          source={
-                                                            nestedAnswers[
-                                                              item[1].item
-                                                                .answer
-                                                                .question_id
-                                                            ] != undefined &&
-                                                            nestedAnswers[
-                                                              item[1].item
-                                                                .answer
-                                                                .question_id
-                                                            ][option][i]
-                                                              .value ==
-                                                              subQOptions
-                                                              ? images.checked
-                                                              : images.unchecked
-                                                          }
-                                                          style={{
-                                                            width: 20,
-                                                            height: 20,
-                                                          }}
-                                                          resizeMode={'contain'}
-                                                        />
-                                                        <Text
-                                                          style={{
-                                                            fontSize: _font(15),
-                                                            color:
-                                                              colours.black,
-                                                            marginLeft: 10,
-                                                          }}>
-                                                          {subQOptions}
-                                                        </Text>
-                                                      </TouchableOpacity>
-                                                    </>
-                                                  );
-                                                },
-                                              )}
-                                            </>
-                                          );
-                                        }
-                                        if (subQuestion.type == 'checkbox') {
-                                          return (
-                                            <>
-                                              <Text>{subQuestion.name}</Text>
-                                              {subQuestion.answers.map(
-                                                (subQOptions, index3) => {
-                                                  return (
-                                                    <>
-                                                      <TouchableOpacity
-                                                        key={index3}
-                                                        onPress={() => {
-                                                          onChangeSpec(
-                                                            item[1],
-                                                            item[1].subObj[
-                                                              option
-                                                            ][i],
-                                                            subQOptions,
-                                                            'checkbox',
-                                                          );
-                                                        }}
-                                                        style={{
-                                                          width: '100%',
-                                                          marginTop: 20,
-                                                          flexDirection: 'row',
-                                                        }}>
-                                                        <Image
-                                                          source={
-                                                            nestedAnswers[
-                                                              item[1].item
-                                                                .answer
-                                                                .question_id
-                                                            ] != undefined &&
-                                                            nestedAnswers[
-                                                              item[1].item
-                                                                .answer
-                                                                .question_id
-                                                            ][option][
-                                                              i
-                                                            ].value.includes(
+                                                    ] != undefined &&
+                                                    nestedAnswers[
+                                                      item[1].item.answer
+                                                        .question_id
+                                                    ][option][i].value
+                                                  }
+                                                  onChangeText={(value) => {
+                                                    onChangeSpec(
+                                                      item[1],
+                                                      item[1].subObj[option][i],
+                                                      value,
+                                                    );
+                                                    // console.log(
+                                                    //   'nestedAnswer',
+                                                    //   nestedAnswers[
+                                                    //     item[1].item.answer
+                                                    //       .question_id
+                                                    //   ][option][i].value,
+                                                    // );
+                                                  }}
+                                                />
+                                              </>
+                                            );
+                                          }
+                                          if (subQuestion.type == 'radio') {
+                                            return (
+                                              <>
+                                                <Text>{subQuestion.name}</Text>
+                                                {subQuestion.answers.map(
+                                                  (subQOptions, index3) => {
+                                                    return (
+                                                      <>
+                                                        <TouchableOpacity
+                                                          key={index3}
+                                                          onPress={() => {
+                                                            onChangeSpec(
+                                                              item[1],
+                                                              item[1].subObj[
+                                                                option
+                                                              ][i],
                                                               subQOptions,
-                                                            )
-                                                              ? images.check
-                                                              : images.uncheck
-                                                          }
-                                                          style={{
-                                                            width: 20,
-                                                            height: 20,
+                                                            );
                                                           }}
-                                                          resizeMode={'contain'}
-                                                        />
-                                                        <Text
                                                           style={{
-                                                            fontSize: _font(15),
-                                                            color:
-                                                              colours.black,
-                                                            marginLeft: 10,
+                                                            width: '100%',
+                                                            marginTop: 20,
+                                                            flexDirection:
+                                                              'row',
                                                           }}>
-                                                          {subQOptions}
-                                                        </Text>
-                                                      </TouchableOpacity>
-                                                    </>
-                                                  );
-                                                },
-                                              )}
-                                            </>
-                                          );
-                                        }
-                                        if (subQuestion.type == 'time') {
-                                          return (
-                                            <>
-                                              <Text>
-                                                {nestedAnswers[
-                                                  item[1].item.answer
-                                                    .question_id
-                                                ] &&
-                                                  nestedAnswers[
+                                                          <Image
+                                                            source={
+                                                              nestedAnswers[
+                                                                item[1].item
+                                                                  .answer
+                                                                  .question_id
+                                                              ] != undefined &&
+                                                              nestedAnswers[
+                                                                item[1].item
+                                                                  .answer
+                                                                  .question_id
+                                                              ][option][i]
+                                                                .value ==
+                                                                subQOptions
+                                                                ? images.checked
+                                                                : images.unchecked
+                                                            }
+                                                            style={{
+                                                              width: 20,
+                                                              height: 20,
+                                                            }}
+                                                            resizeMode={
+                                                              'contain'
+                                                            }
+                                                          />
+                                                          <Text
+                                                            style={{
+                                                              fontSize: _font(
+                                                                15,
+                                                              ),
+                                                              color:
+                                                                colours.black,
+                                                              marginLeft: 10,
+                                                            }}>
+                                                            {subQOptions}
+                                                          </Text>
+                                                        </TouchableOpacity>
+                                                      </>
+                                                    );
+                                                  },
+                                                )}
+                                              </>
+                                            );
+                                          }
+                                          if (subQuestion.type == 'checkbox') {
+                                            return (
+                                              <>
+                                                <Text>{subQuestion.name}</Text>
+                                                {subQuestion.answers.map(
+                                                  (subQOptions, index3) => {
+                                                    return (
+                                                      <>
+                                                        <TouchableOpacity
+                                                          key={index3}
+                                                          onPress={() => {
+                                                            onChangeSpec(
+                                                              item[1],
+                                                              item[1].subObj[
+                                                                option
+                                                              ][i],
+                                                              subQOptions,
+                                                              'checkbox',
+                                                            );
+                                                          }}
+                                                          style={{
+                                                            width: '100%',
+                                                            marginTop: 20,
+                                                            flexDirection:
+                                                              'row',
+                                                          }}>
+                                                          <Image
+                                                            source={
+                                                              nestedAnswers[
+                                                                item[1].item
+                                                                  .answer
+                                                                  .question_id
+                                                              ] != undefined &&
+                                                              nestedAnswers[
+                                                                item[1].item
+                                                                  .answer
+                                                                  .question_id
+                                                              ][option][
+                                                                i
+                                                              ].value.includes(
+                                                                subQOptions,
+                                                              )
+                                                                ? images.check
+                                                                : images.uncheck
+                                                            }
+                                                            style={{
+                                                              width: 20,
+                                                              height: 20,
+                                                            }}
+                                                            resizeMode={
+                                                              'contain'
+                                                            }
+                                                          />
+                                                          <Text
+                                                            style={{
+                                                              fontSize: _font(
+                                                                15,
+                                                              ),
+                                                              color:
+                                                                colours.black,
+                                                              marginLeft: 10,
+                                                            }}>
+                                                            {subQOptions}
+                                                          </Text>
+                                                        </TouchableOpacity>
+                                                      </>
+                                                    );
+                                                  },
+                                                )}
+                                              </>
+                                            );
+                                          }
+                                          if (subQuestion.type == 'time') {
+                                            return (
+                                              <>
+                                                <Text>
+                                                  {nestedAnswers[
                                                     item[1].item.answer
                                                       .question_id
-                                                  ][option][i].value}
-                                              </Text>
-                                              <DateTimePickerModal
-                                                isVisible={true}
-                                                mode={'time'}
-                                                onConfirm={(date) =>
-                                                  onChangeNested(
-                                                    date,
-                                                    'time',
-                                                    item[1],
-                                                    item[1].subObj[option][i],
-                                                  )
-                                                }
-                                              />
-                                            </>
-                                          );
-                                        }
-                                        if (subQuestion.type == 'date') {
-                                          return (
-                                            <>
-                                              <Text>
-                                                {nestedAnswers[
-                                                  item[1].item.answer
-                                                    .question_id
-                                                ] &&
-                                                  nestedAnswers[
+                                                  ] &&
+                                                    nestedAnswers[
+                                                      item[1].item.answer
+                                                        .question_id
+                                                    ][option][i].value}
+                                                </Text>
+                                                <DateTimePickerModal
+                                                  isVisible={true}
+                                                  mode={'time'}
+                                                  onConfirm={(date) =>
+                                                    onChangeNested(
+                                                      date,
+                                                      'time',
+                                                      item[1],
+                                                      item[1].subObj[option][i],
+                                                    )
+                                                  }
+                                                />
+                                              </>
+                                            );
+                                          }
+                                          if (subQuestion.type == 'date') {
+                                            return (
+                                              <>
+                                                <Text>
+                                                  {nestedAnswers[
                                                     item[1].item.answer
                                                       .question_id
-                                                  ][option][i].value}
-                                              </Text>
-                                              <DateTimePickerModal
-                                                isVisible={true}
-                                                mode={'date'}
-                                                onConfirm={(date) =>
-                                                  onChangeNested(
-                                                    date,
-                                                    'date',
-                                                    item[1],
-                                                    item[1].subObj[option][i],
-                                                  )
-                                                }
-                                              />
-                                            </>
-                                          );
-                                        }
-                                        if (subQuestion.type == 'datetime') {
-                                          return (
-                                            <>
-                                              <Text>
-                                                {nestedAnswers[
-                                                  item[1].item.answer
-                                                    .question_id
-                                                ] &&
-                                                  nestedAnswers[
+                                                  ] &&
+                                                    nestedAnswers[
+                                                      item[1].item.answer
+                                                        .question_id
+                                                    ][option][i].value}
+                                                </Text>
+                                                <DateTimePickerModal
+                                                  isVisible={true}
+                                                  mode={'date'}
+                                                  onConfirm={(date) =>
+                                                    onChangeNested(
+                                                      date,
+                                                      'date',
+                                                      item[1],
+                                                      item[1].subObj[option][i],
+                                                    )
+                                                  }
+                                                />
+                                              </>
+                                            );
+                                          }
+                                          if (subQuestion.type == 'datetime') {
+                                            return (
+                                              <>
+                                                <Text>
+                                                  {nestedAnswers[
                                                     item[1].item.answer
                                                       .question_id
-                                                  ][option][i].value}
-                                              </Text>
-                                              <DateTimePickerModal
-                                                isVisible={true}
-                                                mode={'datetime'}
-                                                onConfirm={(date) =>
-                                                  onChangeNested(
-                                                    date,
-                                                    'datetime',
-                                                    item[1],
-                                                    item[1].subObj[option][i],
-                                                  )
-                                                }
-                                              />
-                                            </>
-                                          );
-                                        }
-                                      },
-                                    )
-                                  : null}
-                              </View>
+                                                  ] &&
+                                                    nestedAnswers[
+                                                      item[1].item.answer
+                                                        .question_id
+                                                    ][option][i].value}
+                                                </Text>
+                                                <DateTimePickerModal
+                                                  isVisible={true}
+                                                  mode={'datetime'}
+                                                  onConfirm={(date) =>
+                                                    onChangeNested(
+                                                      date,
+                                                      'datetime',
+                                                      item[1],
+                                                      item[1].subObj[option][i],
+                                                    )
+                                                  }
+                                                />
+                                              </>
+                                            );
+                                          }
+                                        },
+                                      )
+                                    : null}
+                                </View>
+                              </>
                             )}
                           </>
                         );

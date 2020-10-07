@@ -32,7 +32,6 @@ export const post = async (endpoint, data) => {
   if (user) {
     fd.append('api_token', parsed.api_token);
   }
-
   try {
     const requestBody = {
       data: fd,
@@ -40,7 +39,7 @@ export const post = async (endpoint, data) => {
       method: 'post',
       headers: await getPostHeader(),
     };
-    //console.log('request', requestBody);
+    console.log('request', JSON.stringify(requestBody));
     const result = await axios(requestBody);
     //console.log('result', result);
     if (result.status == 200) {

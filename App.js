@@ -5,11 +5,12 @@ import {NavigationContainer} from '@react-navigation/native';
 import {navigationRef} from './src/utils/service';
 import {localNotificationService} from './src/LocalNotificationService';
 import {onOpenNotification} from './src/notifications'
+import { LogBox } from 'react-native';
 
 const App = () => {
   React.useEffect(() => {
     localNotificationService.configure(onOpenNotification);
-    
+    LogBox.ignoreAllLogs(true)
   }, []);
 
   return (
